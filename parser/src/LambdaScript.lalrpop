@@ -1,0 +1,62 @@
+use std::str::FromStr;
+use crate::ast;
+
+grammar;
+
+pub Program: ast::Program = {
+    <Stmt+> => ast::Program(<>),
+};
+
+Stmt: ast::Stmt = {
+    Term => ast::Stmt::ExprStmt(<>),
+    DefStmt => ast::Stmt::DefStmt(<>),
+};
+
+DefStmt: ast::Def = {
+    <name:Ident> "=" <expr:Term> => ast::Def{name, expr},
+}
+
+Term: ast::Expr = {
+    "(" <Expr> ")" => <>,
+    Expr,
+};
+
+Expr: ast::Expr = {
+    Identifier => ast::Expr::Identifier(<>),
+    Abstruction => ast::Expr::Abstraction(<>),
+    Application => ast::Expr::Application(<>),
+    Literal => ast::Expr::Literal(<>),
+};
+
+Abstruction: ast::Abstruction = {
+    "\\" <args:Ident+> "." <expr:Term>
+     => ast::Abstruction{args, body:Box::new(expr)}
+};
+
+Identifier: ast::Identifier = {
+    Ident,
+};
+
+Application: ast::Application  = {
+    "$" <left:Term> <right:Term>
+        => ast::Application{left: Box::new(left), right: Box::new(right)},
+};
+
+Literal: String = {
+    Num,
+};
+
+Num: String = r"[0-9]+" => <>.to_string();
+
+Ident: String = <r"[a-z_]\w*"> => <>.to_string();
+
+SemiColon<T>: Vec<T> = {
+    <v:(<T> ";")*> <e:T?> => match e {
+        None => v,
+        Some(e) => {
+            let mut v = v;
+            v.push(e);
+            v
+        }
+    }
+};
