@@ -1,5 +1,4 @@
-#[derive(Debug, PartialEq)]
-pub struct Program(pub Vec<Stmt>);
+pub type Program = Vec<Stmt>;
 
 #[derive(Debug, PartialEq)]
 pub enum Stmt {
@@ -16,12 +15,16 @@ pub struct Def {
 #[derive(Debug, PartialEq)]
 pub enum Expr {
     Identifier(Identifier),
-    Abstraction(Abstruction),
+    Abstruction(Abstruction),
     Application(Application),
-    Literal(String),
+    Literal(Literal),
 }
 
-pub type Identifier = String;
+#[derive(Debug, PartialEq)]
+pub enum Identifier {
+    Identifier(String),
+    ExternIdentifier(String),
+}
 
 #[derive(Debug, PartialEq)]
 pub struct Abstruction {
@@ -37,5 +40,4 @@ pub struct Application {
 
 pub type Args = Vec<Identifier>;
 
-#[derive(Debug, PartialEq)]
-pub struct Literal(pub String);
+pub type Literal = String;

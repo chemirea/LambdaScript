@@ -4,12 +4,12 @@ use crate::ast;
 grammar;
 
 pub Program: ast::Program = {
-    <Stmt+> => ast::Program(<>),
+    <Stmt+> => <>,
 };
 
 Stmt: ast::Stmt = {
-    Term => ast::Stmt::ExprStmt(<>),
     DefStmt => ast::Stmt::DefStmt(<>),
+    Term => ast::Stmt::ExprStmt(<>),
 };
 
 DefStmt: ast::Def = {
@@ -23,7 +23,7 @@ Term: ast::Expr = {
 
 Expr: ast::Expr = {
     Identifier => ast::Expr::Identifier(<>),
-    Abstruction => ast::Expr::Abstraction(<>),
+    Abstruction => ast::Expr::Abstruction(<>),
     Application => ast::Expr::Application(<>),
     Literal => ast::Expr::Literal(<>),
 };
@@ -35,6 +35,7 @@ Abstruction: ast::Abstruction = {
 
 Identifier: ast::Identifier = {
     Ident,
+    ExternIdent => ast::Identifier::ExternIdentifier(<>),
 };
 
 Application: ast::Application  = {
@@ -48,7 +49,12 @@ Literal: String = {
 
 Num: String = r"[0-9]+" => <>.to_string();
 
-Ident: String = <r"[a-z_]\w*"> => <>.to_string();
+Ident: ast::Identifier = <r"[a-z]\w*">
+    => ast::Identifier::Identifier(<>.to_string() + &"_lambda");
+
+ExternIdent: String = {
+     <i:r"[!][a-z][\w\.]*"> => <>.to_string().replace("!", ""),
+}
 
 SemiColon<T>: Vec<T> = {
     <v:(<T> ";")*> <e:T?> => match e {
